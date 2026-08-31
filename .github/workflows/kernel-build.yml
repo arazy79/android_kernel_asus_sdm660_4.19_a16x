@@ -26,7 +26,7 @@ jobs:
       - name: Checkout kernel source
         uses: actions/checkout@v4
         with:
-          repository: arazy79/android_kernel_asus_sdm660-4.19
+          repository: arazy79/android_kernel_asus_sdm660_4.19_a16x
           ref: ${{ github.event.inputs.branch }}
           path: kernel
           submodules: recursive
@@ -157,7 +157,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kernel-a16-sonic-${{ github.event.inputs.branch }}-${{ github.run_id }}
+          name: kernel-a16-4.19-${{ github.event.inputs.branch }}-${{ github.run_id }}
           path: |
             kernel/out/arch/arm64/boot/Image.gz-dtb
           if-no-files-found: warn
