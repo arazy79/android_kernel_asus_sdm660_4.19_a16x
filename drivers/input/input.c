@@ -27,7 +27,6 @@
 #include <linux/device.h>
 #include <linux/mutex.h>
 #include <linux/rcupdate.h>
-#include <linux/ksu.h>
 #include "input-compat.h"
 
 MODULE_AUTHOR("Vojtech Pavlik <vojtech@suse.cz>");
@@ -383,15 +382,6 @@ static void input_handle_event(struct input_dev *dev,
 			       unsigned int type, unsigned int code, int value)
 {
 	int disposition;
-
-	/*
-	 * KernelSU: хук input_handle_event.
-	 * Перехватываем события ввода для определения нажатия
-	 * аппаратной кнопки громкости при загрузке — это используется
-	 * для активации безопасного режима KernelSU (Safe Mode).
-	 * Вызывается до обработки события.
-	 */
-	ksu_handle_input_handle_event(&type, &code, &value);
 
 	disposition = input_get_disposition(dev, type, code, &value);
 
