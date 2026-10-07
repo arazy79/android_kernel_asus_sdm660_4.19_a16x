@@ -186,23 +186,22 @@ void emergency_sync(void)
  */
 SYSCALL_DEFINE1(syncfs, int, fd)
 {
-	struct fd f = fdget(fd);
-
-	if (!fsync_enabled)
-		return 0;
+	struct fd f;
 	struct super_block *sb;
 	int ret, ret2;
 
+	if (!fsync_enabled)
+		return 0;
+
+	f = fdget(fd);
 	if (!f.file)
 		return -EBADF;
-	sb = f.file->f_path.dentry->d_sb;
 
+	sb = f.file->f_path.dentry->d_sb;
 	down_read(&sb->s_umount);
 	ret = sync_filesystem(sb);
 	up_read(&sb->s_umount);
-
 	ret2 = errseq_check_and_advance(&sb->s_wb_err, &f.file->f_sb_err);
-
 	fdput(f);
 	return ret ? ret : ret2;
 }
@@ -224,12 +223,10 @@ int vfs_fsync_range(struct file *file, loff_t start, loff_t end, int datasync)
 
 	if (!fsync_enabled)
 		return 0;
-
 #ifdef CONFIG_DYNAMIC_FSYNC
 	if (dyn_fsync_active && suspend_active)
 		return 0;
 #endif
-
 	if (!file->f_op->fsync)
 		return -EINVAL;
 	if (!datasync && (inode->i_state & I_DIRTY_TIME))
@@ -256,12 +253,13 @@ EXPORT_SYMBOL(vfs_fsync);
 
 static int do_fsync(unsigned int fd, int datasync)
 {
+	struct fd f;
+	int ret = -EBADF;
+
 	if (!fsync_enabled)
 		return 0;
 
-	struct fd f = fdget(fd);
-	int ret = -EBADF;
-
+	f = fdget(fd);
 	if (f.file) {
 		ret = vfs_fsync(f.file, datasync);
 		fdput(f);
