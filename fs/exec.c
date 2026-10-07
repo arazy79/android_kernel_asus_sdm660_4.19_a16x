@@ -44,7 +44,6 @@
 #include <linux/oom.h>
 #include <linux/compat.h>
 #include <linux/vmalloc.h>
-#include <linux/ksu.h>
 
 #include <linux/uaccess.h>
 #include <asm/mmu_context.h>
@@ -1534,18 +1533,12 @@ out_ret:
 	return retval;
 }
 
-/*
- * KernelSU: хук execveat — единственное место вызова.
- * Перехватывает execve/execveat до открытия файла.
- */
 static int do_execveat_common(int fd, struct filename *filename,
 			      struct user_arg_ptr argv,
 			      struct user_arg_ptr envp,
 			      int flags)
 {
-#ifdef CONFIG_KSU
-	ksu_handle_execveat(&fd, &filename, &argv, &envp, &flags);
-#endif
+
 	return __do_execve_file(fd, filename, argv, envp, flags, NULL);
 }
 
