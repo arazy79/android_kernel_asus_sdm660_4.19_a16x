@@ -4791,7 +4791,6 @@ static void smblib_bb_removal_work(struct work_struct *work)
 
 #define BOOST_BACK_UNVOTE_DELAY_MS		750
 #define BOOST_BACK_STORM_COUNT			3
-#define WEAK_CHG_STORM_COUNT			8
 irqreturn_t smblib_handle_switcher_power_ok(int irq, void *data)
 {
 	struct smb_irq_data *irq_data = data;
