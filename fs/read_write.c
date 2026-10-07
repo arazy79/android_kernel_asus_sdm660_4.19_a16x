@@ -20,7 +20,6 @@
 #include <linux/compat.h>
 #include <linux/mount.h>
 #include <linux/fs.h>
-#include <linux/ksu.h>
 #include "internal.h"
 
 #include <linux/uaccess.h>
@@ -309,10 +308,6 @@ static ssize_t new_sync_read(struct file *filp, char __user *buf, size_t len, lo
 	return ret;
 }
 
-/*
- * __vfs_read — низкоуровневое чтение.
- * KSU хук здесь НЕ нужен — он стоит в vfs_read() выше по стеку.
- */
 ssize_t __vfs_read(struct file *file, char __user *buf, size_t count,
 		   loff_t *pos)
 {
@@ -337,17 +332,9 @@ ssize_t kernel_read(struct file *file, void *buf, size_t count, loff_t *pos)
 }
 EXPORT_SYMBOL(kernel_read);
 
-/*
- * vfs_read — единственное место где стоит KSU хук.
- * Перехватывает все read-вызовы для pipe-механизма KernelSU.
- */
 ssize_t vfs_read(struct file *file, char __user *buf, size_t count, loff_t *pos)
 {
 	ssize_t ret;
-
-#ifdef CONFIG_KSU
-	ksu_handle_vfs_read(&file, &buf, &count, &pos);
-#endif
 
 	if (!(file->f_mode & FMODE_READ))
 		return -EBADF;
